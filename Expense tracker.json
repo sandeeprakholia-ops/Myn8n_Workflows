@@ -1,0 +1,248 @@
+{
+  "name": "Expense tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        -80
+      ],
+      "id": "3301217b-410c-4184-9675-9cbd5327b76d",
+      "name": "When chat message received",
+      "webhookId": "b1434d90-6004-4ca2-b913-28fc8cadeec1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\n {{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a expense manager, analyse the input and segregate the output into four elements\n\nRemaining balance is a running total, if the expense if credit, add it to the balance, else subtract from the balance\n\n1. Type of expense (Credit/Debit)\n2. Category \n3. Amount\n4. Remaining Balance\n\nAfter every calculation, use google sheet tool to append the row. \n\nif at any point, the balance is zero or negative, send a mail that says I'm bankrupt officially. Use gmail send tool"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        -80
+      ],
+      "id": "961fe246-ab66-461b-af8d-11863718ca8d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        144
+      ],
+      "id": "130ceb4d-9e55-4891-a5eb-6745ebb856ae",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A954JoFwoWaBbDmF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        144
+      ],
+      "id": "74e26b13-9b6d-4d97-9b69-242975be45c3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XU_2XuoO7ETnL1apADTvHHHaUEgwOD4TrAhbAp_s0BQ",
+          "mode": "list",
+          "cachedResultName": "Expense Tracker Outskill Class",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XU_2XuoO7ETnL1apADTvHHHaUEgwOD4TrAhbAp_s0BQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XU_2XuoO7ETnL1apADTvHHHaUEgwOD4TrAhbAp_s0BQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Type of Expense": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Type_of_Expense', ``, 'string') }}",
+            "Category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Category', ``, 'string') }}",
+            "Amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Amount', ``, 'string') }}",
+            "Remaining Balance": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Remaining_Balance', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Type of Expense",
+              "displayName": "Type of Expense",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Remaining Balance",
+              "displayName": "Remaining Balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        144
+      ],
+      "id": "2f84a887-c712-4a90-ab04-00903a049192",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "frSiOJuJiOKr1Ivh",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sandeeprakholia.niam10@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        144
+      ],
+      "id": "239875d5-cdc7-479b-ac5a-68b88e8c1f1a",
+      "name": "Send a message in Gmail",
+      "webhookId": "de8fb248-d764-4209-a46b-d2f0fba3f984",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HTWsURVt1rE2MaJZ",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "abc0b85b-a535-41b2-be1d-a6ac19d8355c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "17ff48deeb5a18668bc867048a2df2c1f828902d1b700206c1f27b331debda34"
+  },
+  "id": "GlStQqUagf0D1Ojo55J2H",
+  "tags": []
+}

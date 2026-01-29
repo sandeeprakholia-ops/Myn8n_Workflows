@@ -1,0 +1,158 @@
+{
+  "name": "gmail mcp server",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "fdea4e2d-12c3-4c12-b86c-8c90e42dadb8"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        48,
+        272
+      ],
+      "id": "d37bc184-2a7c-4650-9f8b-840a37bc4b77",
+      "name": "MCP Server Trigger",
+      "webhookId": "fdea4e2d-12c3-4c12-b86c-8c90e42dadb8"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve multiple email messages based on filters. AI-configurable parameters: Return_All (boolean) - whether to return all matching messages; Search (string) - Gmail query string to filter messages; Received_After (string) - datetime (RFC3339) after which messages are received; Received_Before (string) - datetime before which messages are received; Sender (string) - email address of the sender",
+        "operation": "getAll",
+        "returnAll": "={{ $fromAI('Return_All', 'Whether to return all matching messages or limit results', 'boolean', false) }}",
+        "simple": "={{ $fromAI('Simplify', 'Whether to return simplified output', 'boolean', true) }}",
+        "filters": {
+          "q": "={{ $fromAI('Search', 'Gmail query string to filter messages (e.g., is:unread, from:example@email.com)', 'string', '') }}",
+          "receivedAfter": "={{ $fromAI('Received_After', 'Return messages received after this date (RFC3339 format or relative like 2024-01-01)', 'string', '') }}",
+          "receivedBefore": "={{ $fromAI('Received_Before', 'Return messages received before this date (RFC3339 format)', 'string', '') }}",
+          "sender": "={{ $fromAI('Sender', 'Email address of the sender to filter by', 'string', '') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        496
+      ],
+      "id": "a636de12-2b85-43b8-805a-3b041a440414",
+      "name": "Get Gmail",
+      "webhookId": "23b2a30e-3a39-4079-afba-3659bbf6e703",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XSg2t36YKzKIYw5P",
+          "name": "sandeep.gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('To', 'Email address of the recipient', 'string') }}",
+        "subject": "={{ $fromAI('Subject', 'Subject line of the email', 'string') }}",
+        "message": "={{ $fromAI('Message', 'HTML content of the email message', 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        496
+      ],
+      "id": "6313f07e-5be6-4d42-b067-b6d845ed02de",
+      "name": "Send Gmail",
+      "webhookId": "068d2de6-00c8-4d5b-9d7f-194aaecc1127",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XSg2t36YKzKIYw5P",
+          "name": "sandeep.gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an email draft. AI-configurable parameters: Subject (string) - the subject of the draft; Message (string) - the body of the draft; Attachment_Field_Name__in_Input_ (string) - input field name containing attachments; BCC (string) - comma-separated BCC recipients; CC (string) - comma-separated CC recipients.",
+        "resource": "draft",
+        "subject": "={{ $fromAI('Subject', 'Subject line of the draft email', 'string') }}",
+        "message": "={{ $fromAI('Message', 'Body content of the draft email', 'string') }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "={{ $fromAI('Attachment_Field_Name', 'Input field name containing attachments', 'string', '') }}"
+              }
+            ]
+          },
+          "bccList": "={{ $fromAI('BCC', 'Comma-separated BCC recipients', 'string', '') }}",
+          "ccList": "={{ $fromAI('CC', 'Comma-separated CC recipients', 'string', '') }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        496
+      ],
+      "id": "b5cff3b9-2ab4-4426-8141-00e29c1afb48",
+      "name": "Create a draft Gmail",
+      "webhookId": "8998136b-6f47-44ca-bab9-2f90c00d1482",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XSg2t36YKzKIYw5P",
+          "name": "sandeep.gmail.com"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "82a23d90-c402-4781-878f-34c5df7d361a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "17ff48deeb5a18668bc867048a2df2c1f828902d1b700206c1f27b331debda34"
+  },
+  "id": "7HHVewQq-yCinqHPVjryu",
+  "tags": []
+}

@@ -1,0 +1,396 @@
+{
+  "name": "JOB Lead Generator with Ai Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Job Query Leads",
+        "formDescription": "Please share your Basic Requirements to understand & help you.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Please Provide your Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Mobile",
+              "fieldType": "number",
+              "placeholder": "Your Number enter correct nUmber",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Highest Education",
+              "placeholder": "Mention Highest Education as Bsc/MSc etc.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "College /University",
+              "placeholder": "Your College University Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Experience In years",
+              "fieldType": "number",
+              "placeholder": "Years Please",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Put Genuine Mail id",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Share you Query ",
+              "placeholder": "Share Briefly"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "ignoreBots": true
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -736,
+        -144
+      ],
+      "id": "f61d5938-fbcf-4820-b359-b4e9f4138395",
+      "name": "On form submission",
+      "webhookId": "c162111b-5f70-47a4-934c-408c4426dc8b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2e43ace7-e35d-4f60-bb26-c356a7033f06",
+              "leftValue": "={{ $json['Share you Query '] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -512,
+        -144
+      ],
+      "id": "706a97cd-f2a6-4d3f-9199-cd184435e592",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Share you Query '] }}",
+        "options": {
+          "systemMessage": "=You are a spam filter; you will receive submissions from the JOB lEAD form and have to check whether the submissions are spam or legitimate enquiries. The JOB LEAD form is a JOB inquiry form for our RECRUITMENT   agency\n\nEverything that is not a request or question related to our business should be categorised as spam. If someone says a test message, then it's spam.\n\nAdditionally, if you detect dummy emails like \"mail@example.org\", this falls under spam bucket\n\nIf it is a genuine enquiry, use the genuine enquiries tool\nIf it is not, use the spam enquiries tool\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -240,
+        -144
+      ],
+      "id": "00eebf8f-5704-4645-a558-a9e64749cc13",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        80
+      ],
+      "id": "183697a6-a9a4-4b9b-a805-0bc361e7c621",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A954JoFwoWaBbDmF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Append row in sheet in Google Sheets",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Awil_0tzGPUN527gKea6Tq8GoVrsbCMy_Bp4wA48UWo",
+          "mode": "list",
+          "cachedResultName": "Jobs Leads HumanTide",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Awil_0tzGPUN527gKea6Tq8GoVrsbCMy_Bp4wA48UWo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1564483865,
+          "mode": "list",
+          "cachedResultName": "Spam",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Awil_0tzGPUN527gKea6Tq8GoVrsbCMy_Bp4wA48UWo/edit#gid=1564483865"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Mobile": "={{ $json.Mobile }}",
+            "Highest Education": "={{ $json['Highest Education'] }}",
+            "Experiece": "={{ $json['Experience In years'] }}",
+            "Query": "={{ $json['Share you Query '] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experiece",
+              "displayName": "Experiece",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Highest Education",
+              "displayName": "Highest Education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "0e21b9c7-2522-48da-8aa2-811aac175298",
+      "name": "SPAM Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "frSiOJuJiOKr1Ivh",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Append row in sheet in Google Sheets",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Awil_0tzGPUN527gKea6Tq8GoVrsbCMy_Bp4wA48UWo",
+          "mode": "list",
+          "cachedResultName": "Jobs Leads HumanTide",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Awil_0tzGPUN527gKea6Tq8GoVrsbCMy_Bp4wA48UWo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Genuine",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Awil_0tzGPUN527gKea6Tq8GoVrsbCMy_Bp4wA48UWo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+            "Mobile": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Mobile', ``, 'string') }}",
+            "Query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+            "Experiece": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Experiece', ``, 'string') }}",
+            "Highest Education": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Highest_Education', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experiece",
+              "displayName": "Experiece",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Highest Education",
+              "displayName": "Highest Education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        80
+      ],
+      "id": "a5e98dcf-05c1-4a96-b344-75c574b9b2fa",
+      "name": "Genuine Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "frSiOJuJiOKr1Ivh",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SPAM Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genuine Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "066630ab-1fe8-4e77-887c-c032febb947c",
+  "meta": {
+    "instanceId": "17ff48deeb5a18668bc867048a2df2c1f828902d1b700206c1f27b331debda34"
+  },
+  "id": "ar2EGBMPOyA4fEJwEWN2o",
+  "tags": []
+}

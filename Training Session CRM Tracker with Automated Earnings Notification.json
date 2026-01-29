@@ -1,0 +1,269 @@
+{
+  "name": "Training Session CRM Tracker with Automated Earnings Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Training Session Submission",
+        "formDescription": "Please submit your training session details to update the CRM and receive your earnings acknowledgment",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Your Name",
+              "fieldName": "trainerName",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Email",
+              "fieldType": "email",
+              "fieldName": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Capacity",
+              "fieldType": "dropdown",
+              "fieldName": "capacity",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Trainer"
+                  },
+                  {
+                    "option": "Moderator"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Training Location",
+              "fieldName": "location",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Training Topic/Name",
+              "fieldName": "trainingName",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Training Date",
+              "fieldType": "date",
+              "fieldName": "trainingDate",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Session Start Time",
+              "fieldName": "startTime",
+              "placeholder": "e.g. 09:00 AM",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Session End Time",
+              "fieldName": "endTime",
+              "placeholder": "e.g. 05:00 PM",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Session Duration (hours)",
+              "fieldName": "duration",
+              "placeholder": "e.g. 8",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number of Participants",
+              "fieldType": "number",
+              "fieldName": "participants",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thank you! Your training session has been recorded. You will receive an acknowledgment email shortly with your earnings details."
+            }
+          }
+        }
+      },
+      "id": "d67bdc0d-8f4c-4371-83aa-73e57b150312",
+      "name": "Training Data Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        736,
+        48
+      ],
+      "webhookId": "fcc007f9-79d9-4229-bf44-08c57f0870b6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "submissionDate",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "status",
+              "value": "Submitted",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "91e62f64-d2b2-49a1-b2b6-5e7cb940d723",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "13nPx5-bc86-3JDZj8eFj2cgQ2nhMtGF9LlJanktyjXE",
+          "mode": "list",
+          "cachedResultName": "HumanTide Training CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13nPx5-bc86-3JDZj8eFj2cgQ2nhMtGF9LlJanktyjXE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13nPx5-bc86-3JDZj8eFj2cgQ2nhMtGF9LlJanktyjXE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4e09e174-1ac0-4d0d-94f9-85809d577441",
+      "name": "Update CRM Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        48
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "frSiOJuJiOKr1Ivh",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get form data from input\nconst trainerName = $input.item.json.trainerName;\nconst trainingTopic = $input.item.json.trainingName;\nconst location = $input.item.json.location;\nconst sessionDate = $input.item.json.trainingDate;\nconst participants = $input.item.json.participants;\nconst capacity = $input.item.json.capacity || 'trainer';\nconst startTime = $input.item.json.startTime || 'N/A';\nconst endTime = $input.item.json.endTime || 'N/A';\nconst duration = $input.item.json.duration || 'N/A';\n\n// Calculate earnings based on capacity\nlet earningsPerSession;\nif (capacity.toLowerCase() === 'trainer') {\n  earningsPerSession = 5000;\n} else if (capacity.toLowerCase() === 'moderator') {\n  earningsPerSession = 3000;\n} else {\n  earningsPerSession = 0;\n}\n\nconst totalEarnings = earningsPerSession;\n\n// Format professional acknowledgment message\nconst emailSubject = `Training Session Acknowledgment - ${trainingTopic}`;\n\nconst emailBody = `Dear ${trainerName},\n\nThank you for conducting the training session. We acknowledge receipt of your session details:\n\nTraining Topic: ${trainingTopic}\nLocation: ${location}\nDate: ${sessionDate}\nStart Time: ${startTime}\nEnd Time: ${endTime}\nDuration: ${duration}\nNumber of Participants: ${participants}\nCapacity/Role: ${capacity}\n\nYour earnings for this session: Rs ${totalEarnings}\n\nWe appreciate your valuable contribution to our training program.\n\nBest regards,\nTraining Management Team`;\n\n// Return all original fields plus email fields\nreturn {\n  ...($input.item.json),\n  totalEarnings: totalEarnings,\n  emailSubject: emailSubject,\n  emailBody: emailBody\n};"
+      },
+      "id": "b79c6dde-b8e0-4e2a-bf9f-9b154f1e0acc",
+      "name": "Calculate Earnings and Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "396ef081-2846-492c-9d28-12fa4bd60b1d",
+      "name": "Send Acknowledgment Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1632,
+        48
+      ],
+      "webhookId": "3b4a997b-0d47-4ff1-b136-927a8307ba70",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HTWsURVt1rE2MaJZ",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Training Data Form": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Update CRM Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CRM Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Calculate Earnings and Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Earnings and Format Message": {
+      "main": [
+        [
+          {
+            "node": "Send Acknowledgment Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d03821d7-dc3e-4dab-b532-0162f132df9e",
+  "meta": {
+    "instanceId": "17ff48deeb5a18668bc867048a2df2c1f828902d1b700206c1f27b331debda34"
+  },
+  "id": "rQ0OGVbRxkS40jT1WJ6bK",
+  "tags": []
+}
